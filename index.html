@@ -371,7 +371,7 @@
       max-width: 48ch;
       color: rgba(245, 245, 245, 0.42);
       font-size: 0.78rem;
-      line-height: 1.55;
+      line-height: 1.72;
       position: relative;
       z-index: 1;
       text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
@@ -380,6 +380,14 @@
 
     .state-result .footer {
       display: block;
+    }
+
+    .footer span {
+      display: block;
+    }
+
+    .footer span + span {
+      margin-top: 10px;
     }
 
     .state-result .counter-wrap {
@@ -660,7 +668,7 @@
           <img class="result-icon" src="icon-fynd.png" alt="" hidden>
           <span class="icon-fallback" aria-hidden="true">⚡</span>
           <span class="result-label">Fynd</span>
-          <span class="result-value">12-50ms</span>
+          <span class="result-value">10-50ms</span>
         </div>
       </div>
 
@@ -669,8 +677,8 @@
       </div>
 
       <p class="footer">
-        Other aggregators range: typical 1inch / 0x / Paraswap response time. Fynd: 10-50ms reflects
-        typical fast-path routing performance for this widget comparison.
+        <span>Other aggregators range: typical 1inch / 0x / Paraswap response time.</span>
+        <span>Fynd: 10-50ms reflects typical fast-path routing performance for this widget comparison.</span>
       </p>
     </section>
   </main>
