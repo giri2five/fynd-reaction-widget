@@ -711,6 +711,16 @@
       const againWrap = document.getElementById("againWrap");
       const results = document.getElementById("results");
       const resultRows = Array.from(results.querySelectorAll(".result-row"));
+      const rowLookup = Object.fromEntries(
+        resultRows.map((row) => {
+          const key = row.classList.contains("you")
+            ? "you"
+            : row.classList.contains("aggregator")
+              ? "aggregator"
+              : "fynd";
+          return [key, row];
+        })
+      );
       const youValue = document.getElementById("youValue");
       const idleFox = document.getElementById("idleFox");
       const idleFoxImage = document.getElementById("idleFoxImage");
@@ -838,6 +848,24 @@
         againWrap.classList.remove("ready");
       }
 
+      function getResultOrder() {
+        if (finalTime <= 50) {
+          return ["you", "fynd", "aggregator"];
+        }
+
+        if (finalTime > 750) {
+          return ["fynd", "aggregator", "you"];
+        }
+
+        return ["fynd", "you", "aggregator"];
+      }
+
+      function applyResultOrder() {
+        getResultOrder().forEach((key) => {
+          results.appendChild(rowLookup[key]);
+        });
+      }
+
       function runSprint() {
         sprint.classList.remove("fade");
         sprint.classList.add("active");
@@ -859,10 +887,13 @@
 
       function showResults() {
         const inAggregatorRange = finalTime >= 250 && finalTime <= 750;
-        resultRows.forEach((row, index) => {
+        applyResultOrder();
+        const orderedRows = Array.from(results.querySelectorAll(".result-row"));
+
+        orderedRows.forEach((row, index) => {
           const timeoutId = window.setTimeout(() => {
             row.classList.add("visible");
-            if (index === 0 && inAggregatorRange) {
+            if (row.classList.contains("you") && inAggregatorRange) {
               row.classList.add("highlight");
             }
           }, index * 200);
