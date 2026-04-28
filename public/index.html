@@ -431,24 +431,6 @@
       animation: foxTrail 2.8s ease-in-out infinite;
     }
 
-    .idle-fox::after {
-      content: "zoom";
-      position: absolute;
-      left: -18px;
-      top: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(245, 245, 245, 0.74);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      backdrop-filter: blur(10px);
-      animation: bubblePulse 2.8s ease-in-out infinite;
-    }
-
     .fox-fallback {
       border-radius: 50%;
       background:
@@ -556,17 +538,6 @@
       }
     }
 
-    @keyframes bubblePulse {
-      0%, 100% {
-        transform: translateY(0) scale(1);
-        opacity: 0.72;
-      }
-      50% {
-        transform: translateY(-4px) scale(1.04);
-        opacity: 1;
-      }
-    }
-
     @keyframes fyndShimmer {
       0% {
         transform: translateX(-100%);
@@ -616,13 +587,6 @@
         height: 98px;
       }
 
-      .idle-fox::after {
-        left: -8px;
-        top: -2px;
-        padding: 6px 10px;
-        font-size: 0.62rem;
-      }
-
       .running-fox {
         width: 84px;
       }
@@ -654,7 +618,6 @@
       }
 
       .idle-fox::before,
-      .idle-fox::after,
       .result-row.fynd::after {
         animation: none;
       }
