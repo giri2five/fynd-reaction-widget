@@ -708,7 +708,7 @@
   </main>
 
   <div class="idle-fox" id="idleFox" aria-hidden="true">
-    <img id="idleFoxImage" src="fox.png" alt="" hidden>
+    <img id="idleFoxImage" src="fox-idle.png" alt="" hidden>
     <span class="fox-fallback" id="idleFoxFallback"></span>
   </div>
 
@@ -737,6 +737,7 @@
       const resultRows = Array.from(results.querySelectorAll(".result-row"));
       const youValue = document.getElementById("youValue");
       const idleFox = document.getElementById("idleFox");
+      const idleFoxImage = document.getElementById("idleFoxImage");
       const sprint = document.getElementById("sprint");
       const announcer = document.getElementById("announcer");
 
@@ -850,6 +851,10 @@
         idleFox.classList.toggle("hidden", !visible);
       }
 
+      function setCornerFoxRunning(isRunning) {
+        idleFoxImage.src = isRunning ? "fox.png" : "fox-idle.png";
+      }
+
       function hideResults() {
         resultRows.forEach((row) => {
           row.classList.remove("visible", "highlight");
@@ -905,6 +910,7 @@
           tapButton.textContent = "Tap to start";
           tapButton.classList.add("button-primary");
           tapButton.disabled = false;
+          setCornerFoxRunning(false);
           setIdleFoxVisible(true);
           hideResults();
           sprint.classList.remove("active", "fade");
@@ -915,7 +921,8 @@
         if (nextState === "running") {
           tapButton.textContent = "Tap to stop";
           tapButton.classList.add("button-primary");
-          setIdleFoxVisible(false);
+          setCornerFoxRunning(true);
+          setIdleFoxVisible(true);
           hideResults();
           announcer.textContent = "Timer started.";
           return;
@@ -923,7 +930,8 @@
 
         if (nextState === "result") {
           tapButton.textContent = "Tap to start";
-          setIdleFoxVisible(false);
+          setCornerFoxRunning(true);
+          setIdleFoxVisible(true);
           announcer.textContent = "Your reaction time was " + formatTime(finalTime) + ".";
           showResults();
         }
