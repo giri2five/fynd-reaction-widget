@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How fast are you? - Fynd</title>
+  <meta
+    name="description"
+    content="A reaction time test. See how human reflexes compare to Fynd's routing speed."
+  >
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="icon" type="image/png" href="public/fox-idle.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0a0a;
+      --surface: rgba(17, 17, 17, 0.72);
+      --surface-strong: rgba(26, 26, 26, 0.88);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f5f5f5;
+      --dim: #888888;
+      --muted: #555555;
+      --accent: #ff4500;
+      --accent-soft: rgba(255, 69, 0, 0.2);
+      --accent-strong: rgba(255, 69, 0, 0.34);
+      --yellow: #ffaa00;
+      --green: #00d97e;
+      --glow: 0 0 0 1px rgba(255, 69, 0, 0.18), 0 16px 48px rgba(255, 69, 0, 0.14);
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at top left, rgba(255, 112, 43, 0.24), transparent 32%),
+        radial-gradient(circle at right center, rgba(255, 91, 27, 0.16), transparent 36%),
+        linear-gradient(180deg, rgba(5, 5, 5, 0.18), rgba(5, 5, 5, 0.7)),
+        url("public/bg.jpg") center / cover no-repeat;
+      opacity: 1;
+    }
+
+    body::after {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%) 0 0 / 18px 18px,
+        linear-gradient(225deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%) 0 0 / 18px 18px;
+      mix-blend-mode: soft-light;
+      opacity: 0.22;
+    }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 72px;
+      isolation: isolate;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      width: min(100%, 600px);
+      text-align: center;
+      background:
+        radial-gradient(circle at top center, rgba(255, 135, 72, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(22, 18, 16, 0.92), rgba(11, 10, 10, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 32px;
+      padding: 36px 24px 28px;
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(255, 93, 31, 0.08), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(255, 170, 0, 0.05), transparent 28%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.25rem, 5vw, 3rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      margin: 14px auto 0;
+      max-width: 34ch;
+      color: rgba(245, 245, 245, 0.58);
+      font-size: 1rem;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .counter-wrap {
+      margin: 34px 0 18px;
+      min-height: 148px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .counter {
+      margin: 0;
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(4.4rem, 15vw, 7.5rem);
+      line-height: 0.92;
+      letter-spacing: -0.08em;
+      font-variant-numeric: tabular-nums;
+      text-wrap: balance;
+      text-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
+      position: relative;
+      z-index: 1;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .state-result .button-row {
+      display: none;
+    }
+
+    .button {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      min-width: 220px;
+      min-height: 64px;
+      padding: 16px 28px;
+      font: 700 1rem/1 "Space Grotesk", system-ui, sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+      cursor: pointer;
+      transition:
+        transform 160ms var(--ease-out),
+        box-shadow 160ms var(--ease-out),
+        background-color 160ms var(--ease-out),
+        border-color 160ms var(--ease-out),
+        opacity 160ms var(--ease-out);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(255, 69, 0, 0.18);
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.82);
+      outline-offset: 3px;
+    }
+
+    .button-primary {
+      background: linear-gradient(180deg, #ff7c38, var(--accent));
+      box-shadow:
+        0 16px 36px rgba(255, 69, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .button-primary:hover {
+      box-shadow: 0 18px 40px rgba(255, 69, 0, 0.38);
+    }
+
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: rgba(245, 245, 245, 0.92);
+    }
+
+    .results {
+      margin: 28px 0 0;
+      display: none;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .state-result .results {
+      display: grid;
+    }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 15px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 22px rgba(0, 0, 0, 0.16);
+      opacity: 0;
+      transform: translateY(8px);
+      transition:
+        opacity 300ms var(--ease-out),
+        transform 300ms var(--ease-out),
+        border-color 200ms var(--ease-out),
+        box-shadow 200ms var(--ease-out);
+    }
+
+    .result-row.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-row.highlight {
+      border-color: rgba(255, 69, 0, 0.34);
+      box-shadow: var(--glow);
+    }
+
+    .result-row.fynd {
+      position: relative;
+      overflow: hidden;
+      animation: fyndPulse 2s ease-in-out infinite;
+    }
+
+    .result-icon,
+    .fox-fallback,
+    .icon-fallback {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px;
+    }
+
+    .icon-fallback {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .result-label {
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(245, 245, 245, 0.94);
+    }
+
+    .result-value {
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.95rem;
+      color: var(--dim);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .result-row.you .result-value {
+      color: rgba(255, 255, 255, 0.96);
+    }
+
+    .result-row.aggregator .result-value {
+      color: var(--yellow);
+    }
+
+    .result-row.fynd .result-value {
+      color: var(--green);
+    }
+
+    .again-wrap {
+      min-height: 88px;
+      display: none;
+      align-items: end;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .state-result .again-wrap {
+      display: flex;
+    }
+
+    .again-wrap .button {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .again-wrap.ready .button {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .footer {
+      margin-top: 26px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+
+    .state-result .counter-wrap {
+      min-height: auto;
+      margin-bottom: 10px;
+    }
+
+    .state-result .counter {
+      font-size: clamp(4rem, 12vw, 6.6rem);
+    }
+
+    .idle-fox {
+      position: fixed;
+      right: clamp(14px, 3vw, 28px);
+      bottom: clamp(12px, 3vw, 24px);
+      width: min(30vw, 120px);
+      height: min(30vw, 120px);
+      display: flex;
+      align-items: end;
+      justify-content: end;
+      opacity: 0.92;
+      transition:
+        opacity 260ms var(--ease-out),
+        transform 260ms var(--ease-out);
+      pointer-events: none;
+      z-index: 2;
+      animation: foxFloat 3s ease-in-out infinite;
+    }
+
+    .idle-fox.hidden {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+
+    .idle-fox img,
+    .fox-fallback {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .fox-fallback {
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, #ffa362, #ff6a17 62%, #d93b00 100%);
+      box-shadow: 0 14px 30px rgba(255, 69, 0, 0.22);
+    }
+
+    .sprint {
+      position: fixed;
+      left: -220px;
+      top: 50%;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate3d(-220px, -50%, 0);
+      z-index: 3;
+      will-change: transform, opacity;
+    }
+
+    .sprint.active {
+      opacity: 1;
+      transition:
+        transform 200ms linear,
+        opacity 90ms linear;
+      transform: translate3d(110vw, -50%, 0);
+    }
+
+    .sprint.fade {
+      opacity: 0;
+    }
+
+    .streak {
+      width: min(45vw, 340px);
+      height: auto;
+      margin-right: -52px;
+      opacity: 0.7;
+    }
+
+    .streak-fallback {
+      width: min(45vw, 340px);
+      height: 36px;
+      margin-right: -52px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(255, 170, 0, 0.14) 22%, rgba(255, 69, 0, 0.72) 72%, transparent 100%);
+      filter: blur(1px);
+    }
+
+    .running-fox {
+      width: min(22vw, 120px);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes fyndPulse {
+      0%, 100% {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.02),
+          0 0 0 0 rgba(0, 217, 126, 0.18);
+      }
+      50% {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.02),
+          0 0 0 10px rgba(0, 217, 126, 0.04);
+      }
+    }
+
+    @keyframes foxFloat {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        align-items: stretch;
+        padding: 16px 14px 88px;
+      }
+
+      .panel {
+        padding: 28px 16px 22px;
+        margin: auto 0;
+      }
+
+      .counter-wrap {
+        min-height: 118px;
+        margin: 28px 0 16px;
+      }
+
+      .state-result .counter-wrap {
+        min-height: auto;
+      }
+
+      .result-row {
+        grid-template-columns: auto 1fr;
+        gap: 10px 12px;
+      }
+
+      .result-value {
+        grid-column: 2;
+        white-space: normal;
+      }
+
+      .button {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .idle-fox {
+        width: 86px;
+        height: 86px;
+      }
+
+      .running-fox {
+        width: 84px;
+      }
+
+      .streak,
+      .streak-fallback {
+        width: 220px;
+        margin-right: -36px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .sprint,
+      .sprint.active {
+        transition: none;
+      }
+
+      .idle-fox {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel" aria-labelledby="title">
+      <h1 id="title">How fast are you?</h1>
+      <p class="subtitle">Tap to start the timer. Tap again to stop.</p>
+
+      <div class="counter-wrap">
+        <p class="counter" id="counter" aria-live="polite">0 ms</p>
+      </div>
+
+      <div class="button-row">
+        <button class="button button-primary" id="tapButton" type="button">Tap to start</button>
+      </div>
+
+      <div class="results" id="results" aria-live="polite">
+        <div class="result-row you" data-row="0">
+          <img class="result-icon" src="public/icon-you.png" alt="" hidden>
+          <span class="icon-fallback" aria-hidden="true">👤</span>
+          <span class="result-label">You</span>
+          <span class="result-value" id="youValue">0ms</span>
+        </div>
+        <div class="result-row aggregator" data-row="1">
+          <img class="result-icon" src="public/icon-aggregator.png" alt="" hidden>
+          <span class="icon-fallback" aria-hidden="true">🐢</span>
+          <span class="result-label">Other aggregators</span>
+          <span class="result-value">250-750ms</span>
+        </div>
+        <div class="result-row fynd" data-row="2">
+          <img class="result-icon" src="public/icon-fynd.png" alt="" hidden>
+          <span class="icon-fallback" aria-hidden="true">⚡</span>
+          <span class="result-label">Fynd</span>
+          <span class="result-value">12-50ms ⚡</span>
+        </div>
+      </div>
+
+      <div class="again-wrap" id="againWrap">
+        <button class="button button-secondary" id="againButton" type="button">Try again</button>
+      </div>
+
+      <p class="footer">
+        Other aggregators range: typical 1inch / 0x / Paraswap response time. Fynd: 12-50ms reflects
+        typical fast-path routing performance for this widget comparison.
+      </p>
+    </section>
+  </main>
+
+  <div class="idle-fox" id="idleFox" aria-hidden="true">
+    <img id="idleFoxImage" src="public/fox-idle.png" alt="" hidden>
+    <span class="fox-fallback" id="idleFoxFallback"></span>
+  </div>
+
+  <div class="sprint" id="sprint" aria-hidden="true">
+    <img class="streak" id="streakImage" src="public/streak.png" alt="" hidden>
+    <div class="streak-fallback" id="streakFallback"></div>
+    <img class="running-fox" id="runningFoxImage" src="public/fox.png" alt="" hidden>
+    <span class="fox-fallback running-fox" id="runningFoxFallback"></span>
+  </div>
+
+  <audio id="tickSound" preload="auto">
+    <source src="public/sounds/tick.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="whooshSound" preload="auto">
+    <source src="public/sounds/whoosh.mp3" type="audio/mpeg">
+  </audio>
+  <div class="sr-only" id="announcer" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const counter = document.getElementById("counter");
+      const tapButton = document.getElementById("tapButton");
+      const againButton = document.getElementById("againButton");
+      const againWrap = document.getElementById("againWrap");
+      const results = document.getElementById("results");
+      const resultRows = Array.from(results.querySelectorAll(".result-row"));
+      const youValue = document.getElementById("youValue");
+      const idleFox = document.getElementById("idleFox");
+      const sprint = document.getElementById("sprint");
+      const announcer = document.getElementById("announcer");
+
+      const tickSound = document.getElementById("tickSound");
+      const whooshSound = document.getElementById("whooshSound");
+
+      let state = "idle";
+      let startTime = 0;
+      let rafId = 0;
+      let resultTimeouts = [];
+      let sprintTimeout = 0;
+      let sprintCleanup = 0;
+      let finalTime = 0;
+
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      function imageFallback(imgId, fallbackId) {
+        const image = document.getElementById(imgId);
+        const fallback = document.getElementById(fallbackId);
+
+        function showFallback() {
+          image.hidden = true;
+          fallback.hidden = false;
+        }
+
+        function showImage() {
+          if (image.naturalWidth > 0) {
+            fallback.hidden = true;
+            image.hidden = false;
+          } else {
+            showFallback();
+          }
+        }
+
+        image.addEventListener("load", showImage);
+        image.addEventListener("error", showFallback);
+
+        if (image.complete) {
+          showImage();
+        }
+      }
+
+      function setupResultIcons() {
+        resultRows.forEach((row) => {
+          const image = row.querySelector(".result-icon");
+          const fallback = row.querySelector(".icon-fallback");
+
+          function showFallback() {
+            image.hidden = true;
+            fallback.hidden = false;
+          }
+
+          function showImage() {
+            if (image.naturalWidth > 0) {
+              fallback.hidden = true;
+              image.hidden = false;
+            } else {
+              showFallback();
+            }
+          }
+
+          image.addEventListener("load", showImage);
+          image.addEventListener("error", showFallback);
+
+          if (image.complete) {
+            showImage();
+          }
+        });
+      }
+
+      function safePlay(audio) {
+        if (!audio) {
+          return;
+        }
+
+        try {
+          audio.volume = 0.3;
+          audio.currentTime = 0;
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {});
+          }
+        } catch (error) {
+          // Missing or blocked audio should never interrupt the widget.
+        }
+      }
+
+      function formatTime(ms) {
+        return Math.max(0, Math.floor(ms)) + " ms";
+      }
+
+      function tick(now) {
+        if (state !== "running") {
+          return;
+        }
+
+        const elapsed = now - startTime;
+        counter.textContent = formatTime(elapsed);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function clearTimers() {
+        cancelAnimationFrame(rafId);
+        resultTimeouts.forEach(clearTimeout);
+        resultTimeouts = [];
+        clearTimeout(sprintTimeout);
+        clearTimeout(sprintCleanup);
+      }
+
+      function setIdleFoxVisible(visible) {
+        idleFox.classList.toggle("hidden", !visible);
+      }
+
+      function hideResults() {
+        resultRows.forEach((row) => {
+          row.classList.remove("visible", "highlight");
+        });
+        againWrap.classList.remove("ready");
+      }
+
+      function runSprint() {
+        sprint.classList.remove("fade");
+        sprint.classList.add("active");
+        if (prefersReducedMotion.matches) {
+          sprint.classList.add("fade");
+          sprintCleanup = window.setTimeout(() => {
+            sprint.classList.remove("active", "fade");
+          }, 10);
+          return;
+        }
+
+        sprintCleanup = window.setTimeout(() => {
+          sprint.classList.add("fade");
+          window.setTimeout(() => {
+            sprint.classList.remove("active", "fade");
+          }, 100);
+        }, 210);
+      }
+
+      function showResults() {
+        const inAggregatorRange = finalTime >= 250 && finalTime <= 750;
+        resultRows.forEach((row, index) => {
+          const timeoutId = window.setTimeout(() => {
+            row.classList.add("visible");
+            if (index === 0 && inAggregatorRange) {
+              row.classList.add("highlight");
+            }
+          }, index * 200);
+          resultTimeouts.push(timeoutId);
+        });
+
+        const buttonDelay = prefersReducedMotion.matches ? 0 : 500;
+        resultTimeouts.push(window.setTimeout(() => {
+          againWrap.classList.add("ready");
+        }, buttonDelay));
+
+        sprintTimeout = window.setTimeout(runSprint, 1000);
+      }
+
+      function setState(nextState) {
+        state = nextState;
+        document.body.className = "state-" + nextState;
+
+        if (nextState === "idle") {
+          counter.textContent = "0 ms";
+          tapButton.textContent = "Tap to start";
+          tapButton.classList.add("button-primary");
+          tapButton.disabled = false;
+          setIdleFoxVisible(true);
+          hideResults();
+          sprint.classList.remove("active", "fade");
+          announcer.textContent = "Timer reset.";
+          return;
+        }
+
+        if (nextState === "running") {
+          tapButton.textContent = "Tap to stop";
+          tapButton.classList.add("button-primary");
+          setIdleFoxVisible(false);
+          hideResults();
+          announcer.textContent = "Timer started.";
+          return;
+        }
+
+        if (nextState === "result") {
+          tapButton.textContent = "Tap to start";
+          setIdleFoxVisible(false);
+          announcer.textContent = "Your reaction time was " + formatTime(finalTime) + ".";
+          showResults();
+        }
+      }
+
+      function startTimer() {
+        clearTimers();
+        finalTime = 0;
+        startTime = performance.now();
+        safePlay(tickSound);
+        setState("running");
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function stopTimer() {
+        cancelAnimationFrame(rafId);
+        finalTime = performance.now() - startTime;
+        counter.textContent = formatTime(finalTime);
+        youValue.textContent = Math.floor(finalTime) + "ms";
+        safePlay(whooshSound);
+        setState("result");
+      }
+
+      function reset() {
+        clearTimers();
+        finalTime = 0;
+        setState("idle");
+      }
+
+      tapButton.addEventListener("click", () => {
+        if (state === "idle" || state === "result") {
+          startTimer();
+          return;
+        }
+
+        if (state === "running") {
+          stopTimer();
+        }
+      });
+
+      againButton.addEventListener("click", reset);
+
+      imageFallback("idleFoxImage", "idleFoxFallback");
+      imageFallback("runningFoxImage", "runningFoxFallback");
+      imageFallback("streakImage", "streakFallback");
+      setupResultIcons();
+      setState("idle");
+    })();
+  </script>
+</body>
+</html>
